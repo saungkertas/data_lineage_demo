@@ -39,7 +39,7 @@ def assign_key(query):
         clean_key = ''.join(i for i in cte_key if not i in bad_chars)
         clean_key = clean_key.replace(' AS', '').replace(' ', '')
         key.append(clean_key)
-        # print(clean_key)
+    key.append("final_query")
 
     return key
 
