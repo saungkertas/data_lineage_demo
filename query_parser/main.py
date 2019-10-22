@@ -2,7 +2,8 @@ import re
 
 
 def main():
-    query = """WITH trans AS ( SELECT account_id, date, type, operation, amount, balance, k_symbol, bank, account, trans_id FROM `id-bi-staging.playground_dev.public_dataset_financial_trans` WHERE date >= '1998-12-01'), account AS ( SELECT district_id, frequency, date, account_id FROM `id-bi-staging.playground_dev.public_dataset_financial_account`), district AS ( SELECT A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, district_id FROM `id-bi-staging.playground_dev.public_dataset_financial_district`), disp AS ( SELECT client_id, account_id, type, disp_id FROM `id-bi-staging.playground_dev.public_dataset_financial_disp`), client AS ( SELECT gender, birth_date, district_id, client_id FROM `id-bi-staging.playground_dev.public_dataset_financial_client`) SELECT trans.date, trans.type AS trans_type, trans.operation, trans.amount, trans.balance, trans.k_symbol, trans.bank, trans.account, account.frequency, account.account_id, district.A2, district.A3, district.A4, district.A5, district.A6, district.A7, district.A8, district.A9, district.A10, district.A11, district.A12, district.A13, district.A14, district.A15, district.A16, district.district_id, disp.type, disp.type as disp_type, client.gender, client.birth_date FROM trans JOIN account ON account.account_id = trans.account_id JOIN district ON district.district_id = account.district_id JOIN disp ON account.account_id = disp.account_id JOIN client ON client.client_id = disp.client_id """
+    query = """WITH trans AS ( SELECT trans.account_id AS account_id, trans.date AS date, type, operation, amount, balance, k_symbol, bank, account, trans_id, district_id, frequency FROM `id-bi-staging.playground_dev.public_dataset_financial_trans` AS trans JOIN `id-bi-staging.playground_dev.public_dataset_financial_account` AS account ON account.account_id = trans.account_id WHERE trans.date >= '1998-12-01'), district AS ( SELECT A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, district_id FROM `id-bi-staging.playground_dev.public_dataset_financial_district`), disp AS ( SELECT client_id, account_id, type, disp_id FROM `id-bi-staging.playground_dev.public_dataset_financial_disp`), client AS ( SELECT gender, birth_date, district_id, client_id FROM `id-bi-staging.playground_dev.public_dataset_financial_client`) SELECT trans.date, trans.type AS trans_type, trans.operation, trans.amount, trans.balance, trans.k_symbol, trans.bank, trans.account, account.frequency, account.account_id, district.A2, district.A3, district.A4, district.A5, district.A6, district.A7, district.A8, district.A9, district.A10, district.A11, district.A12, district.A13, district.A14, district.A15, district.A16, district.district_id, disp.type, disp.type AS disp_type, client.gender, client.birth_date FROM trans JOIN district ON district.district_id = account.district_id JOIN disp ON account.account_id = disp.account_id JOIN client ON client.client_id = disp.client_id"""
+    # query = """WITH trans AS ( SELECT account_id, date, type, operation, amount, balance, k_symbol, bank, account, trans_id FROM `id-bi-staging.playground_dev.public_dataset_financial_trans` WHERE date >= '1998-12-01'), account AS ( SELECT district_id, frequency, date, account_id FROM `id-bi-staging.playground_dev.public_dataset_financial_account`), district AS ( SELECT A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, district_id FROM `id-bi-staging.playground_dev.public_dataset_financial_district`), disp AS ( SELECT client_id, account_id, type, disp_id FROM `id-bi-staging.playground_dev.public_dataset_financial_disp`), client AS ( SELECT gender, birth_date, district_id, client_id FROM `id-bi-staging.playground_dev.public_dataset_financial_client`) SELECT trans.date, trans.type AS trans_type, trans.operation, trans.amount, trans.balance, trans.k_symbol, trans.bank, trans.account, account.frequency, account.account_id, district.A2, district.A3, district.A4, district.A5, district.A6, district.A7, district.A8, district.A9, district.A10, district.A11, district.A12, district.A13, district.A14, district.A15, district.A16, district.district_id, disp.type, disp.type as disp_type, client.gender, client.birth_date FROM trans JOIN account ON account.account_id = trans.account_id JOIN district ON district.district_id = account.district_id JOIN disp ON account.account_id = disp.account_id JOIN client ON client.client_id = disp.client_id """
     key = assign_key(query)
     value = assign_value(query)
 
@@ -57,7 +58,6 @@ def assign_value(query):
     for cte_value in cte_values:
         clean_cte_value = ''.join(i for i in cte_value if not i in bad_chars)
         value.append(clean_cte_value)
-
     last_cte_value = query.split(")")
     value.append(last_cte_value[-1])
     return value
@@ -81,9 +81,17 @@ def assign_key(query):
 
 
 def get_columns(cte_value):
+    column_list = []
     split_columns = re.search(r'SELECT(.*?)FROM', cte_value).group(1)
-    columns = remove_space(split_columns).split(',')
-    return columns
+    column_split_by_comma = split_columns.split(',')
+
+    for column in column_split_by_comma:
+        column_split_by_alias = column.split('AS')
+        if len(column_split_by_alias) > 1:
+            column_list.append(remove_space(column_split_by_alias[1]))
+        else:
+            column_list.append(remove_space(column_split_by_alias[0]))
+    return column_list
 
 
 def parse_join(cte_value):
