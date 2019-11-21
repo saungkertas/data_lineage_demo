@@ -45,3 +45,7 @@ models:
           materialized: table
       trans:
           materialized: ephemeral
+
+# table -> saved the result in a table
+# view -> saved the result in a table
+# ephemeral -> no saving method, just refer the source as another query for temporary.
