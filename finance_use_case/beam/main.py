@@ -70,11 +70,11 @@ def main():
     district_data = get_pipeline('playground_dev', p, 'Get District Table', 'id-bi-staging',
                                  'public_dataset_financial_district')
 
-    dispatch_pipeline_name = 'dispatch_data'
-    dispatch_data = get_pipeline('playground_dev', p, 'Get Dispatch Table', 'id-bi-staging',
-                                 'public_dataset_financial_disp')
+    disp_pipeline_name = 'disp_data'
+    disp_data = get_pipeline('playground_dev', p, 'Get Dispatch Table', 'id-bi-staging',
+                             'public_dataset_financial_disp')
 
-    client_pipeline_name = 'dispatch_data'
+    client_pipeline_name = 'disp_data'
     client_data = get_pipeline('playground_dev', p, 'Get Client Table', 'id-bi-staging',
                                'public_dataset_financial_client')
 
@@ -95,19 +95,19 @@ def main():
                             join_district_log_title, join_district_pipeline_title, district_data, join_district_key,
                             district_pipeline_name)
 
-    join_dispatch_log_title = 'Log Join Dispatch'
-    join_dispatch_pipeline_title = 'Join with Dispatch'
-    join_dispatch_key = 'account_id'
+    join_disp_log_title = 'Log Join Dispatch'
+    join_disp_pipeline_title = 'Join with Dispatch'
+    join_disp_key = 'account_id'
 
-    join_dispatch = do_join(join_district, join_district_pipeline_title,
-                            join_dispatch_log_title, join_dispatch_pipeline_title, dispatch_data, join_dispatch_key,
-                            dispatch_pipeline_name)
+    join_disp = do_join(join_district, join_district_pipeline_title,
+                        join_disp_log_title, join_disp_pipeline_title, disp_data, join_disp_key,
+                        disp_pipeline_name)
 
     join_client_log_title = 'Log Join Client'
     join_client_pipeline_title = 'Join with Client'
     join_client_key = 'client_id'
 
-    do_join(join_dispatch, join_dispatch_pipeline_title,
+    do_join(join_disp, join_disp_pipeline_title,
             join_client_log_title, join_client_pipeline_title, client_data, join_client_key,
             client_pipeline_name)
 
