@@ -2,7 +2,7 @@ import re
 
 
 def main():
-    query = """WITH movies AS( SELECT movie_id,movie_name,movie_year,movie_rank FROM `id-bi-staging.playground_dev.public_dataset_imdb_movies`), actors AS ( SELECT actor_id,actor_first_name, actor_last_name, actor_gender FROM `id-bi-staging.playground_dev.public_dataset_imdb_actors`), directors AS( SELECT director_id, director_first_name, director_last_name FROM `id-bi-staging.playground_dev.public_dataset_imdb_directors`), directors_genres AS( SELECT director_id, genre, prob FROM `id-bi-staging.playground_dev.public_dataset_imdb_directors_genres`), movies_directors AS( SELECT director_id, movie_id FROM `id-bi-staging.playground_dev.public_dataset_imdb_movies_directors`), movies_genres AS( SELECT movie_id, genre FROM `id-bi-staging.playground_dev.public_dataset_imdb_movies_genres`), roles AS( SELECT actor_id, movie_id, role FROM `id-bi-staging.playground_dev.public_dataset_imdb_roles`) SELECT movies.movie_id, movies.movie_name, movies.movie_year, movies.movie_rank, movies_genres.genre, roles.role, directors.director_id, actors.actor_id, actors.actor_first_name, actors.actor_last_name, actors.actor_gender FROM movies JOIN movies_directors ON movies.movie_id = movies_directors.movie_id JOIN movies_genres ON movies.movie_id = movies_genres.movie_id JOIN roles ON movies.movie_id = roles.movie_id JOIN directors ON directors.director_id = movies_directors.director_id JOIN actors ON roles.actor_id = actors.actor_id"""
+    query = read_file('sql/query.sql')
     key = assign_key(query)
     value = assign_value(query)
 
@@ -111,6 +111,12 @@ def parse_join(cte_value):
 
 def remove_space(word):
     return word.replace(' ', '')
+
+
+def read_file(filename):
+    f = open(filename, "r")
+    content = f.read()
+    return content
 
 
 if __name__ == '__main__':
